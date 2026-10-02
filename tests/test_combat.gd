@@ -1,0 +1,38 @@
+extends RefCounted
+func run(t) -> bool:
+	for name in ["spawner", "meteor", "bullet", "upgrade_pickup"]:
+		if not FileAccess.file_exists("res://scripts/" + name + ".gd"):
+			t.check(false, "Missing combat component " + name)
+			return false
+	var s = load("res://scripts/run_state.gd").new()
+	s.start(); s.elapsed = 20.0; t.check(s.spawn_interval() == 0.7, "stage two cadence")
+	s.elapsed = 40.0; t.check(s.spawn_interval() == 0.45, "stage three cadence")
+	var meteor = load("res://scripts/meteor.gd").new()
+	meteor.setup(Vector2.ZERO, Vector2.ZERO, 2)
+	t.check(not meteor.take_hit(), "large meteor needs two hits")
+	t.check(meteor.take_hit(), "large meteor second hit destroys")
+	t.check(not meteor.take_hit(), "dead meteor does not count twice")
+	meteor.free()
+	meteor = load("res://scripts/meteor.gd").new(); meteor.setup(Vector2.ZERO, Vector2.ZERO, 1)
+	t.check(meteor.take_hit(), "small meteor one hit"); meteor.free()
+	s.start()
+	for i in range(7): t.check(not s.register_kill(), "no early pickup " + str(i))
+	t.check(s.register_kill(), "eighth kill drops pickup")
+	s.collect_upgrade(); s.collect_upgrade()
+	for i in range(8): t.check(not s.register_kill(), "no pickup at max level " + str(i))
+	var SpawnerScript = load("res://scripts/spawner.gd")
+	var a = SpawnerScript.new(); var b = SpawnerScript.new()
+	a.reset(37); b.reset(37)
+	t.check(a.advance(1.9, 1.9, 1.0).is_empty(), "two-second opening buffer")
+	a.reset(37)
+	t.check(a.advance(4.0, 4.0, 1.0) == b.advance(4.0, 4.0, 1.0), "seeded spawns repeat")
+	var bullet = load("res://scripts/bullet.gd").new()
+	bullet.setup(Vector2(100, 200), Vector2.UP); bullet.advance(0.3)
+	t.check(bullet.hits_circle(Vector2(100, 100), 20.0), "swept bullet catches crossed meteor")
+	bullet.free()
+	var pickup = load("res://scripts/upgrade_pickup.gd").new()
+	pickup.setup(Vector2(100, 100)); pickup.advance(7.99)
+	t.check(not pickup.expired, "pickup lasts until 8 seconds")
+	pickup.advance(0.01); t.check(pickup.expired, "pickup expires at 8 seconds")
+	pickup.free()
+	return true

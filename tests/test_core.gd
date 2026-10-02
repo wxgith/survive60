@@ -1,0 +1,40 @@
+extends RefCounted
+func run(t) -> bool:
+	for path in ["run_state", "player", "weapon"]:
+		if not FileAccess.file_exists("res://scripts/" + path + ".gd"):
+			t.check(false, "Missing required component " + path)
+			return false
+	var State = load("res://scripts/run_state.gd")
+	var s = State.new()
+	s.start()
+	t.check(s.hp == 3 and s.level == 1 and s.elapsed == 0.0, "fresh run")
+	s.set_paused(true); s.step(10.0, true)
+	t.check(s.hp == 3 and s.elapsed == 0.0, "pause freezes health and clock")
+	s.set_paused(false); s.step(0.1, true)
+	t.check(s.hp == 2, "collision removes one health")
+	s.step(0.1, true)
+	t.check(s.hp == 2, "invulnerability blocks repeated hit")
+	s.start(); s.hp = 1; s.elapsed = 59.99; s.step(0.02, true)
+	t.check(s.phase == State.Phase.LOST, "lethal collision before victory")
+	s.start(); s.step(60.0)
+	t.check(s.phase == State.Phase.WON, "survive 60 seconds")
+	s.step(1.0, true)
+	t.check(s.hp == 3, "ignore late collision")
+	s.start(); s.collect_upgrade(); s.collect_upgrade(); s.collect_upgrade()
+	t.check(s.level == 3, "upgrade capped at three")
+	var p = load("res://scripts/player.gd").new()
+	p.position = Vector2(200, 500)
+	var origin = p.position
+	p.move(Vector2(1, -1), 0.5)
+	t.check(is_equal_approx(p.position.distance_to(origin), 180.0), "diagonal speed normalized")
+	p.move(Vector2(1, -1), 10.0)
+	t.check(p.position.x <= 940 and p.position.y >= 84, "player stays in arena")
+	p.reset()
+	t.check(p.position == Vector2(480, 530), "player reset")
+	p.free()
+	var w = load("res://scripts/weapon.gd").new()
+	t.check(w.advance(0.21, 1).is_empty(), "weapon waits for cadence")
+	t.check(w.advance(0.01, 1).size() == 1, "one bullet each 0.22 seconds")
+	w.reset(); t.check(w.advance(0.22, 2).size() == 2, "double shot")
+	w.reset(); t.check(w.advance(0.22, 3).size() == 3, "triple shot")
+	return true

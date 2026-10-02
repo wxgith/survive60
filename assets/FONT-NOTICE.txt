@@ -1,0 +1,21 @@
+Survive60 UI font notice
+
+File: survive60-ui.otf
+Family / full name: Survive60 UI
+Source family: Noto Sans CJK SC, version 2.004
+Source project: https://github.com/notofonts/noto-cjk
+Upstream license: https://github.com/notofonts/noto-cjk/blob/main/Sans/LICENSE
+License: SIL Open Font License 1.1 (see FONT-LICENSE.txt)
+
+This file is a modified subset of Noto Sans CJK SC, containing characters
+used by this game's interface. The subset was renamed Survive60 UI.
+The font remains under OFL 1.1, not the game's MIT license.
+
+Original font copyright preserved in the font's name table:
+© 2014-2021 Adobe (http://www.adobe.com/).
+Noto is a trademark of Google Inc.
+
+FONT-LICENSE.txt retains the full SIL Open Font License text from the
+source font package and the font-related copyright notices. Unrelated
+Debian packaging-file notices are not included; no Debian packaging
+files are distributed in this repository.

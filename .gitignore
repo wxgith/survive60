@@ -1,0 +1,19 @@
+# Godot 4 editor cache (keep .uid and asset .import files in version control)
+.godot/
+
+# Exported games and local test output
+build/
+*.tmp
+*.log
+
+# Credentials and local environment files
+export_credentials.cfg
+.env
+.env.*
+!.env.example
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
